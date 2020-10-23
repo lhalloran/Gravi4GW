@@ -16,6 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.interpolate as interp
 from osgeo import gdal
+#from matplotlib.colors import LightSource
 
 import G4GW_f # could turn this into a class-style python package...
 
@@ -46,9 +47,9 @@ print('#Gravi4GW: Creating DEM interpolation function...')
 interp_spline = interp.RectBivariateSpline(DEM_x[0,:],-DEM_y[:,0],DEM_z.transpose()) # x,y must be strictly increasing, hence - sign on y
 
 # define x,y of gravity station
-GW_d = 4 # assumed depth to water table from ground surface
-stn_x_array = 2606190.1 + 20*np.arange(-10,10)
-stn_y_array = 1116135.25 + 20*np.arange(-10,10)
+GW_d = 5 # assumed depth to water table from ground surface
+stn_x_array = 2606292 + 25*np.arange(-30,30)
+stn_y_array = 1116278 + 20*np.arange(-30,30)
 stn_array_size = [np.size(stn_x_array),np.size(stn_y_array)]
 nstns = stn_array_size[0]*stn_array_size[1]
 stn_x,stn_y = np.meshgrid(stn_x_array,stn_y_array)
@@ -72,7 +73,7 @@ for i in np.arange(nstns):
 
 dataproc = []
 for n in np.arange(nstns):
-    print(str(n))
+    print('Station point '+str(n)+' of '+str(nstns))
     stn_xyz=np.array([stn_x[n],stn_y[n],stn_z[n]])
     GW_d = GW_d # this could be non-constant in future.
     
@@ -111,17 +112,38 @@ for n in np.arange(nstns):
     print('#Gravi4GW: dg = '   + str(dgdH_uGal[3]) + ' uGal/mH2O')
 dataproc=np.array(dataproc) #convert data to numpy array
 
+#%% plot the results
 # maybe improve this using https://matplotlib.org/3.1.1/gallery/specialty_plots/topographic_hillshading.html
-fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(12,6)) 
-DEM_hs = G4GW_f.hillshade(DEM_zC,45,30)
-demobj = axs[0].contourf(DEM_xC,DEM_yC,DEM_zC,cmap='gist_earth',alpha=1, levels=15)
-axs[0].contourf(DEM_xC,DEM_yC,DEM_hs,cmap='Greys',alpha=0.65,levels=20)
-axs[0].set_title('Input DEM')
+fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(15,8))
+DEM_hs = G4GW_f.hillshade(DEM_zC,45,20)
+#ls = LightSource(azdeg=315, altdeg=45)
+cbobj1 = axs[0].imshow(np.flipud(DEM_hs),cmap='Greys',alpha=1, interpolation='bilinear',extent=[DEM_xC[0,0],DEM_xC[0,-1],DEM_yC[0,0],DEM_yC[-1,0]])
+demobj = axs[0].contourf(DEM_xC,DEM_yC,DEM_zC,cmap='gist_earth',alpha=0.5, levels=100)
+axs[0].invert_yaxis()
+#cbobj1 = axs[0].contourf(DEM_xC,DEM_yC,DEM_hs,cmap='Greys',alpha=0.5,levels=40)
+#axs[0].pcolor(DEM_xC,DEM_yC,DEM_hs,cmap='Greys',alpha=0.5,linewidth=0,rasterized=True)
+#for c in cbobj1.collections:
+#    c.set_edgecolor("face")
+#    c.set_alpha(0.5)
+
+axs[0].set_title('Input DEM (m)')
+axs[0].set_aspect('equal')
+axs[0].grid(c='k')
+plt.setp(axs[0].get_xticklabels(), rotation=45)
+plt.setp(axs[0].get_yticklabels(), rotation=45)
+
 cbarax1 = fig.add_axes([0.48, 0.2, 0.01, 0.6])
 fig.colorbar(demobj, cax=cbarax1, orientation='vertical')
 
-cbobj = axs[1].contourf(stn_x_array, stn_y_array, dataproc[:,-1].reshape(stn_array_size))
-axs[1].set_title('dg/dH (uGal/mH2O)')
+levels=np.linspace(np.min(dataproc[:,-1]),41.93*2-np.min(dataproc[:,-1]),21)
+cbobj2 = axs[1].contourf(stn_x_array, stn_y_array, dataproc[:,-1].reshape(stn_array_size),levels=levels,cmap='bwr')
+for c in cbobj2.collections:
+    c.set_edgecolor("face")
+axs[1].set_title('dg/dH ($\mu$Gal/mH$_2$O)')
+axs[1].set_aspect('equal')
+axs[1].grid(c='k')
+plt.gca().invert_yaxis()
+plt.setp(axs[1].get_xticklabels(), rotation=45)
 cbarax2 = fig.add_axes([0.91, 0.2, 0.01, 0.6])
-fig.colorbar(cbobj, cax=cbarax2, orientation='vertical')
+fig.colorbar(cbobj2, cax=cbarax2, orientation='vertical')
 
