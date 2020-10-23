@@ -86,4 +86,18 @@ def dg(xyz_stn,xyz_pt,dm,debug=False):
         print([d,dg,theta,phi])
         print(dgxyz)
     return dgxyz
-############################################################################
+
+def hillshade(array,azimuth,angle_altitude):
+    # Adapted from:
+    # github.com/rveciana/introduccion-python-geoespacial/blob/master/hillshade.py
+    azimuth = 360.0 - azimuth 
+
+    x, y = np.gradient(array)
+    slope = np.pi/2. - np.arctan(np.sqrt(x*x + y*y))
+    aspect = np.arctan2(-x, y)
+    azimuthrad = azimuth*np.pi/180.
+    altituderad = angle_altitude*np.pi/180.
+
+    shaded = np.sin(altituderad)*np.sin(slope) + np.cos(altituderad)*np.cos(slope)*np.cos((azimuthrad - np.pi/2.) - aspect)
+
+    return 255*(shaded + 1)/2
