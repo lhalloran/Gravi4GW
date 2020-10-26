@@ -22,8 +22,9 @@ import G4GW_f # could turn this into a class-style python package...
 
 # import DEM (must be in a meter-based projection)
 #DEM_path = 'DEMs/Tsalet_30m_DEM_EPSG2056.tif'
-#DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
-DEM_path = 'DEMs/Salar_de_Uyuni_DEM.tif'
+DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
+#DEM_path = 'DEMs/Salar_de_Uyuni_DEM.tif'
+#DEM_path = 'DEMs/Maules_Creek_20m_DEM-H.tif'
 DEM_in = gdal.Open(DEM_path, gdal.GA_ReadOnly) 
 print('#Gravi4GW: DEM file '+str(DEM_path)+' imported. Size = '+str(DEM_in.RasterXSize)+' x '+str(DEM_in.RasterYSize))
 DEM_z = np.array(np.float64(DEM_in.ReadAsArray()))
@@ -47,11 +48,13 @@ print('#Gravi4GW: Creating DEM interpolation function...')
 interp_spline = interp.RectBivariateSpline(DEM_x[0,:],-DEM_y[:,0],DEM_z.transpose()) # x,y must be strictly increasing, hence - sign on y
 
 # define x,y of gravity station
-GW_d = 5 # assumed depth to water table from ground surface
-stn_x_array = 1320850 + 100*np.arange(-10,10)
-stn_y_array = -2236035.0 + 100*np.arange(-10,10)
-#stn_x_array = 2606292 + 25*np.arange(-30,30)
-#stn_y_array = 1116278 + 20*np.arange(-30,30)
+GW_d = 15 # assumed depth to water table from ground surface
+stn_x_array = 2606292 + 10*np.arange(-20,40)
+stn_y_array = 1116278 + 10*np.arange(-25,25)
+#stn_x_array = 1327850 + 100*np.arange(-10,10)
+#stn_y_array = -2236035.0 + 100*np.arange(-10,10)
+#stn_x_array = 1508000+ 20*np.arange(-20,20)
+#stn_y_array = -3523500.0+ 20*np.arange(-20,20)
 stn_array_size = [np.size(stn_x_array),np.size(stn_y_array)]
 nstns = stn_array_size[0]*stn_array_size[1]
 stn_x,stn_y = np.meshgrid(stn_x_array,stn_y_array)
@@ -59,8 +62,19 @@ stn_x = stn_x.flatten()
 stn_y = stn_y.flatten()
 stn_z = stn_x-stn_x
 
+
+
+# for 
+for i in np.arange(nstns):
+    stn_z[i] = interp_spline(stn_x[i],-stn_y[i]) + 0.5
+
+n_r = 40 # number of radial distances for point definition
+resid_OK = 0.025 # approximate acceptable residual based on Bouger plate approx. (see notes)
+max_r = GW_d/resid_OK # max radius from stn for calculation (see notes)
+dataproc = []
+
 # cut out relevant part of DEM and x,y arrays:
-mrgn = 200
+mrgn = max_r
 mmx = [np.min(stn_x_array)-mrgn, np.max(stn_x_array)+mrgn]
 mmy = [np.min(stn_y_array)-mrgn, np.max(stn_y_array)+mrgn]
 xinds = np.where(np.logical_and(np.min(DEM_x,axis=0) > mmx[0], np.max(DEM_x,axis=0) < mmx[1]))[0]
@@ -69,21 +83,14 @@ DEM_xC = DEM_x[yinds,:][:,xinds]
 DEM_yC = DEM_y[yinds,:][:,xinds]
 DEM_zC = DEM_z[yinds,:][:,xinds]
 
-# for 
-for i in np.arange(nstns):
-    stn_z[i] = interp_spline(stn_x[i],-stn_y[i]) + 0.5
-
-dataproc = []
 for n in np.arange(nstns):
-    print('Station point '+str(n)+' of '+str(nstns))
+    print('Station point '+str(n+1)+' of '+str(nstns))
     stn_xyz=np.array([stn_x[n],stn_y[n],stn_z[n]])
     GW_d = GW_d # this could be non-constant in future.
     
     # create sampling points and calulate DEM at these points
     print('#Gravi4GW: Defining sampling points and calculating interpolated DEM at these points...')
-    n_r = 40 # number of radial distances for point definition
-    resid_OK = 0.05 # approximate acceptable residual based on Bouger plate approx. (see notes)
-    max_r = GW_d/resid_OK # max radius from stn for calculation (see notes)
+
     xx,yy,AA= G4GW_f.point_maker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_rad=8)
     npts=np.size(xx)
     zz=xx-xx
@@ -138,7 +145,8 @@ cbarax1 = fig.add_axes([0.48, 0.2, 0.01, 0.6])
 fig.colorbar(demobj, cax=cbarax1, orientation='vertical')
 
 levels=np.linspace(np.min(dataproc[:,-1]),41.93*2-np.min(dataproc[:,-1]),101)
-cbobj2 = axs[1].contourf(stn_x_array, stn_y_array, dataproc[:,-1].reshape(stn_array_size),levels=levels,cmap='bwr')
+#cbobj2 = axs[1].contourf(stn_x_array, stn_y_array, dataproc[:,-1].reshape(stn_array_size),levels=levels,cmap='bwr')
+cbobj2 = axs[1].contourf(stn_x_array, stn_y_array, dataproc[:,-1].reshape(np.flip(stn_array_size)),levels=levels,cmap='bwr')
 for c in cbobj2.collections:
     c.set_edgecolor("face")
 axs[1].set_title('dg/dH ($\mu$Gal/mH$_2$O)')
