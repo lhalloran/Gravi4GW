@@ -22,8 +22,8 @@ import G4GW_f # could turn this into a class-style python package...
 
 # import DEM (must be in a meter-based projection)
 #DEM_path = 'DEMs/Tsalet_30m_DEM_EPSG2056.tif'
-DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
-#DEM_path = 'DEMs/Salar_de_Uyuni_DEM.tif'
+#DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
+DEM_path = 'DEMs/Salar_de_Uyuni_DEM.tif'
 DEM_in = gdal.Open(DEM_path, gdal.GA_ReadOnly) 
 print('#Gravi4GW: DEM file '+str(DEM_path)+' imported. Size = '+str(DEM_in.RasterXSize)+' x '+str(DEM_in.RasterYSize))
 DEM_z = np.array(np.float64(DEM_in.ReadAsArray()))
@@ -48,8 +48,10 @@ interp_spline = interp.RectBivariateSpline(DEM_x[0,:],-DEM_y[:,0],DEM_z.transpos
 
 # define x,y of gravity station
 GW_d = 5 # assumed depth to water table from ground surface
-stn_x_array = 2606292 + 25*np.arange(-30,30)
-stn_y_array = 1116278 + 20*np.arange(-30,30)
+stn_x_array = 1320850 + 100*np.arange(-10,10)
+stn_y_array = -2236035.0 + 100*np.arange(-10,10)
+#stn_x_array = 2606292 + 25*np.arange(-30,30)
+#stn_y_array = 1116278 + 20*np.arange(-30,30)
 stn_array_size = [np.size(stn_x_array),np.size(stn_y_array)]
 nstns = stn_array_size[0]*stn_array_size[1]
 stn_x,stn_y = np.meshgrid(stn_x_array,stn_y_array)
@@ -118,8 +120,8 @@ fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(15,8))
 DEM_hs = G4GW_f.hillshade(DEM_zC,45,20)
 #ls = LightSource(azdeg=315, altdeg=45)
 cbobj1 = axs[0].imshow(np.flipud(DEM_hs),cmap='Greys',alpha=1, interpolation='bilinear',extent=[DEM_xC[0,0],DEM_xC[0,-1],DEM_yC[0,0],DEM_yC[-1,0]])
-demobj = axs[0].contourf(DEM_xC,DEM_yC,DEM_zC,cmap='gist_earth',alpha=0.5, levels=100)
-axs[0].invert_yaxis()
+demobj = axs[0].contourf(DEM_xC,DEM_yC,DEM_zC,cmap='gist_earth',alpha=0.5, levels=80)
+plt.gca().invert_yaxis()
 #cbobj1 = axs[0].contourf(DEM_xC,DEM_yC,DEM_hs,cmap='Greys',alpha=0.5,levels=40)
 #axs[0].pcolor(DEM_xC,DEM_yC,DEM_hs,cmap='Greys',alpha=0.5,linewidth=0,rasterized=True)
 #for c in cbobj1.collections:
@@ -135,7 +137,7 @@ plt.setp(axs[0].get_yticklabels(), rotation=45)
 cbarax1 = fig.add_axes([0.48, 0.2, 0.01, 0.6])
 fig.colorbar(demobj, cax=cbarax1, orientation='vertical')
 
-levels=np.linspace(np.min(dataproc[:,-1]),41.93*2-np.min(dataproc[:,-1]),21)
+levels=np.linspace(np.min(dataproc[:,-1]),41.93*2-np.min(dataproc[:,-1]),101)
 cbobj2 = axs[1].contourf(stn_x_array, stn_y_array, dataproc[:,-1].reshape(stn_array_size),levels=levels,cmap='bwr')
 for c in cbobj2.collections:
     c.set_edgecolor("face")
