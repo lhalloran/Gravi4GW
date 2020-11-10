@@ -11,6 +11,7 @@ v003/004: fine grid idea abandoned, now making concentric points array, and inte
 v005: moved functions to another file G4GW_f... might convert to class later
 v006: now synced to github repo Gravi4GW
 """
+
 import numpy as np
 #import pandas as pd
 import matplotlib.pyplot as plt
@@ -22,8 +23,8 @@ import G4GW_f # could turn this into a class-style python package...
 
 # import DEM (must be in a meter-based projection)
 #DEM_path = 'DEMs/Tsalet_30m_DEM_EPSG2056.tif'
-DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
-#DEM_path = 'DEMs/Salar_de_Uyuni_DEM.tif'
+#DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
+DEM_path = 'DEMs/Salar_de_Uyuni_DEM.tif'
 #DEM_path = 'DEMs/Maules_Creek_20m_DEM-H.tif'
 DEM_in = gdal.Open(DEM_path, gdal.GA_ReadOnly) 
 print('#Gravi4GW: DEM file '+str(DEM_path)+' imported. Size = '+str(DEM_in.RasterXSize)+' x '+str(DEM_in.RasterYSize))
@@ -51,8 +52,8 @@ interp_spline = interp.RectBivariateSpline(DEM_x[0,:],-DEM_y[:,0],DEM_z.transpos
 GW_d = 15 # assumed depth to water table from ground surface
 stn_x_array = 2606292 + 10*np.arange(-20,40)
 stn_y_array = 1116278 + 10*np.arange(-25,25)
-#stn_x_array = 1327850 + 100*np.arange(-10,10)
-#stn_y_array = -2236035.0 + 100*np.arange(-10,10)
+stn_x_array = 1327850 + 30*np.arange(-20,20)
+stn_y_array = -2236035.0 + 30*np.arange(-20,20)
 #stn_x_array = 1508000+ 20*np.arange(-20,20)
 #stn_y_array = -3523500.0+ 20*np.arange(-20,20)
 stn_array_size = [np.size(stn_x_array),np.size(stn_y_array)]
