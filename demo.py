@@ -10,8 +10,8 @@ DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
 #DEM_path = 'DEMs/Maules_Creek_20m_DEM-H.tif'
 # define x,y of gravity station
 GW_d = 4 # assumed depth to water table from ground surface
-stn_x_array = 2606292 + 50*np.arange(-8,8)
-stn_y_array = 1116278 + 50*np.arange(-5,5)
+stn_x_array = 2606457 + 20*np.arange(-20,20)
+stn_y_array = 1116119 + 20*np.arange(-20,20)
 #stn_x_array = 1327850 + 30*np.arange(-20,20)
 #stn_y_array = -2236035.0 + 30*np.arange(-20,20)
 #stn_x_array = 1508000+ 20*np.arange(-20,20)

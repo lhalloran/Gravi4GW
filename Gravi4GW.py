@@ -25,35 +25,41 @@ G=6.67408E-11 # gravitational constant
 rho_H2O = 1000 # density of water
 
 def quickplotterxyz(x,y,z):
-    # quickplotterxyz(x,y,z)
-    # Simple plotting of x,y,z arrays for debugging.
-    # x,y,z : 2-D arrays of x, y, and elevation
+    """
+    quickplotterxyz(x,y,z)
+    Simple plotting of x,y,z arrays for debugging.
+    x,y,z : 2-D arrays of x, y, and elevation
+    """
     fig, axs = plt.subplots(nrows=1,ncols=3,sharex=True,sharey=True,figsize=(12,6)) 
     axs[0].imshow(x); axs[0].set_title('x, min='+str(int(min(x.flatten())))+', max='+str(int(max(x.flatten()))))
     axs[1].imshow(y); axs[1].set_title('y, min='+str(int(min(y.flatten())))+', max='+str(int(max(y.flatten()))))
     axs[2].imshow(z); axs[2].set_title('z, min='+str(int(min(z.flatten())))+', max='+str(int(max(z.flatten()))))
 
-def point_maker(stn_x,stn_y,max_r,nr,dens_rad=8):
-    # point_maker(stn_x,stn_y,max_r,nr,dens_rad=8)
-    #
-    # Returns x,y coordinates the element area represented by each point. Point distribution is 
-    # radial with increasing distance from centre for each subsequent radius. Even radial spacing 
-    # for each r.
-    # 
-    # Parameters:
-    # stn_x, stn_y : coordinates of centre point
-    # max_r : distance of furthest points from centre point
-    # nr : number of radii (including r=0) for point creation
-    # dens_rad : (optional) point density for first non-zero radius, must be multiple of 4
-    #
-    if dens_rad%4 != 0:
-        print('#Gravi4GW: point_maker requires a radial density parameter dens_rad that is a multiple of 4')
+def pointmaker(stn_x,stn_y,max_r,nr,dens_azi=8):
+    """
+    pointmaker(stn_x,stn_y,max_r,nr,dens_azi=8)
+    
+    Returns x,y coordinates the element area represented by 
+    each point. Point distribution is radial with increasing 
+    distance from centre for each subsequent radius. Even 
+    radial spacing for each r.
+    
+    Parameters:
+    stn_x, stn_y : coordinates of centre point
+    max_r : distance of furthest points from centre point
+    nr : number of radii (including r=0) for point creation
+    dens_azi : (optional) point density at first non-zero 
+               radius, controls the azimuthal point 
+               density. must be multiple of 4
+    """
+    if dens_azi%4 != 0:
+        print('#Gravi4GW: pointmaker requires a radial density parameter dens_azi that is a multiple of 4')
         return 0
     rs=np.append(np.array(0.0),np.logspace(np.log10(0.1), np.log10(max_r), num=nr-1))
     log_fac=np.log10(rs[-1]/rs[-2])
     rsextra=rs[-1]*10**log_fac # for calculation of elemental areas of farthest points
     n=rs-rs
-    n=dens_rad + 4*np.floor_divide(rs,10) #number of points for given r, increasing with radius
+    n=dens_azi + 4*np.floor_divide(rs,10) #number of points for given r, increasing with radius
     n[0]=1 # one point at centre
     A = rs-rs # area represent by each point at given r
     for i in np.arange(1,nr-1):
@@ -79,13 +85,17 @@ def point_maker(stn_x,stn_y,max_r,nr,dens_rad=8):
     return x,y,pt_A
 
 def dg(xyz_stn,xyz_pt,dm,debug=False):
-    # dg(xyz_stn,xyz_pt,dm,debug=False) is a function that returns the delta gravity vector for a station point and 
-    # a grid point, given a change in mass of dm at the point
-    #
-    # xyz_stn is local coordiates (in m) of gravity station. numpy array of size 3.
-    # xyz_pt is local coordiates (in m) of point on GW table grid. numpy array of size 3.
-    # dm is (near infinitessimal) change in mass of water at the point on the grid
-    # (optional) debug=True will print internal values for each call of the function
+    """
+    dg(xyz_stn,xyz_pt,dm,debug=False) 
+    
+    Function that returns the delta gravity vector for a station point and 
+    a grid point, given a change in mass of dm at the point
+    
+    xyz_stn : local coordiates (in m) of gravity station. numpy array of size 3.
+    xyz_pt : local coordiates (in m) of point on GW table grid. numpy array of size 3.
+    dm : (near infinitessimal) change in mass of water at the point on the grid
+    debug : True will print internal values for each call of the function
+    """
     dxyz = xyz_pt-xyz_stn;
     dx=dxyz[0]
     dy=dxyz[1]
@@ -190,7 +200,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         # create sampling points and calulate DEM at these points
         print('#Gravi4GW: Defining sampling points and calculating interpolated DEM at these points...')
     
-        xx,yy,AA = point_maker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_rad=8)
+        xx,yy,AA = pointmaker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_rad=8)
         npts=np.size(xx)
         zz=xx-xx
         for i in np.arange(npts):
@@ -199,7 +209,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
             plt.figure(figsize=(10,8)); plt.scatter(xx,yy,c=zz,s=AA,alpha=0.5); plt.axis('equal'); plt.title(str(npts)+' Integration Points'); plt.colorbar()# plot points
             
         # Calculate dg/dH by numerical integration:
-        dH=0.01 # drop in water table in equivalent H2O (equivalent to delta hydraulic head / porsity). Should be small so as to estimate dG/dH.
+        dH=0.01 # drop in water table in equivalent H2O (equivalent to delta hydraulic head / porosity). Should be small so as to estimate dG/dH.
         dgxyz_sum = np.array([0,0,0])
         progresspct=0
         print('#Gravi4GW: Evaluating delta g integral...')
@@ -221,7 +231,8 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
     dataproc=np.array(dataproc) #convert data to numpy array
 
     #%% plot the results
-    if do_figs:
+    only1xy = np.size(gravstn_x) > 1 and np.size(gravstn_y) > 1
+    if do_figs and only1xy:
         # maybe improve this using https://matplotlib.org/3.1.1/gallery/specialty_plots/topographic_hillshading.html
         fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(15,8))
         DEM_hs = hillshade(DEM_zC,45,20)
@@ -235,7 +246,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         #    c.set_edgecolor("face")
         #    c.set_alpha(0.5)
         
-        axs[0].set_title('Input DEM (m)')
+        axs[0].set_title('Input data (m)')
         axs[0].set_aspect('equal')
         axs[0].grid(c='k')
         plt.setp(axs[0].get_xticklabels(), rotation=45)
@@ -249,7 +260,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         cbobj2 = axs[1].contourf(gravstn_x, gravstn_y, dataproc[:,-1].reshape(np.flip(stn_array_size)),levels=levels,cmap='bwr')
         for c in cbobj2.collections:
             c.set_edgecolor("face")
-        axs[1].set_title('dg/dH ($\mu$Gal/mH$_2$O)')
+        axs[1].set_title(r'$\beta$ ($\mu$Gal/mH$_2$O)')
         axs[1].set_aspect('equal')
         axs[1].grid(c='k')
         plt.gca().invert_yaxis()
