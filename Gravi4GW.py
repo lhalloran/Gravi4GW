@@ -151,7 +151,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
          do_figs: boolean to enable creation of figures.
     """
     DEM_in = gdal.Open(tif_path, gdal.GA_ReadOnly) 
-    print('#Gravi4GW: DEM file '+str(tif_path)+' imported. Size = '+str(DEM_in.RasterXSize)+' x '+str(DEM_in.RasterYSize))
+    print('#Gravi4GW: File '+str(tif_path)+' imported. Size = '+str(DEM_in.RasterXSize)+' x '+str(DEM_in.RasterYSize))
     DEM_z = np.array(np.float64(DEM_in.ReadAsArray()))
 
     # make x,y (long, lat) matrices for input DEM
@@ -200,7 +200,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         # create sampling points and calulate DEM at these points
         print('#Gravi4GW: Defining sampling points and calculating interpolated DEM at these points...')
     
-        xx,yy,AA = pointmaker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_rad=8)
+        xx,yy,AA = pointmaker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_azi=8)
         npts=np.size(xx)
         zz=xx-xx
         for i in np.arange(npts):
@@ -214,7 +214,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         progresspct=0
         print('#Gravi4GW: Evaluating delta g integral...')
         for i in np.arange(npts):
-            if int(100*i/npts)-progresspct >=10: # print progress
+            if int(100*i/npts)-progresspct >=20: # print progress
                 progresspct=int(100*i/npts)
                 print('#Gravi4GW: Integration progress = '+str(progresspct)+'%')
             dm = dH*rho_H2O*AA[i]
@@ -224,10 +224,10 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         dgdH = dg1/dH
         dgdH_uGal = dgdH*1E8 #in microGal/mH2O
         dataproc.append([stn_xyz[0],stn_xyz[1],stn_xyz[2],GW_d,dgdH_uGal[0],dgdH_uGal[1],dgdH_uGal[2],dgdH_uGal[3]])
-        print('#Gravi4GW: dg_x = ' + str(dgdH_uGal[0]) + ' uGal/mH2O')
-        print('#Gravi4GW: dg_y = ' + str(dgdH_uGal[1]) + ' uGal/mH2O')
-        print('#Gravi4GW: dg_z = ' + str(dgdH_uGal[2]) + ' uGal/mH2O')
-        print('#Gravi4GW: dg = '   + str(dgdH_uGal[3]) + ' uGal/mH2O')
+        print('#Gravi4GW: beta_x = ' + str(dgdH_uGal[0]) + ' uGal/mH2O')
+        print('#Gravi4GW: beta_y = ' + str(dgdH_uGal[1]) + ' uGal/mH2O')
+        print('#Gravi4GW: beta_z = ' + str(dgdH_uGal[2]) + ' uGal/mH2O')
+        print('#Gravi4GW: beta = '   + str(dgdH_uGal[3]) + ' uGal/mH2O')
     dataproc=np.array(dataproc) #convert data to numpy array
 
     #%% plot the results

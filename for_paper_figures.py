@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from osgeo import gdal
 from matplotlib import cm
-import matplotlib.patches as mpatches
+#import matplotlib.patches as mpatches
 
 #%%
 DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
