@@ -176,3 +176,12 @@ axs[1,1].grid()
 axs[1,1].set_title('d)')
     
 plt.savefig('Output/Rechy_betavsdepth1.pdf')
+
+#%% profile plot
+topoin=pd.read_csv('Other/topo_profile_fig_betavsdepth.csv')
+plt.figure()
+plt.plot(topoin['d'],topoin['z'],'k',lw=3)
+plt.autoscale(enable=True, axis='both', tight=True)
+plt.grid()
+plt.xlabel('x-y distance [m]')
+plt.ylabel('elevation [m]')
