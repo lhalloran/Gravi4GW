@@ -147,12 +147,15 @@ for i in np.arange(n_stns):
     circ=plt.Circle((stn_xa[i],stn_ya[i]),10,color=colours(i),lw=0.5,ec='k')
     axs[0,0].add_artist(circ)
 
+mmbeta=[np.floor(np.min(abs(incdpthout[:,:,6:8]))),np.ceil(np.max(abs(incdpthout[:,:,6:8])))]
+
 # make beta vs depth plot
 for i in np.arange(n_stns):
     axs[0,1].plot(GW_da,incdpthout[i,:,7],c=colours(i),linewidth=3)
 axs[0,1].set_xlabel('Depth [m]')
 axs[0,1].set_ylabel(r'$\beta$ [$\mu$Gal/m$_{H2O}]$')
 axs[0,1].set_xlim([min(GW_da),max(GW_da)])
+axs[0,1].set_ylim(mmbeta)
 axs[0,1].grid()
 axs[0,1].set_title('b)')
 
@@ -162,6 +165,7 @@ for i in np.arange(n_stns):
 axs[1,0].set_xlabel('Depth [m]')
 axs[1,0].set_ylabel(r'$\beta_z$ [$\mu$Gal/m$_{H2O}]$')
 axs[1,0].set_xlim([min(GW_da),max(GW_da)])
+axs[1,0].set_ylim(mmbeta)
 axs[1,0].grid()
 axs[1,0].set_title('c)')
 
@@ -185,3 +189,42 @@ plt.autoscale(enable=True, axis='both', tight=True)
 plt.grid()
 plt.xlabel('x-y distance [m]')
 plt.ylabel('elevation [m]')
+
+#%% effect of integration radius limit
+incaresidout=[]
+arl = np.logspace(-2,-.5,10)
+dpth=2.5
+for i in np.arange(n_stns):
+#i=11
+#if True:
+    print('stn = '+str(i))
+    incaresidout1=[]
+    stn_x=stn_xa[i]
+    stn_y=stn_ya[i]
+    for ar in arl:
+        out = Gravi4GW.Gravi4GW(DEM_path, stn_x, stn_y, dpth, accept_resid=ar, n_r=120, do_figs=False)
+        incaresidout1.append(np.append(out,ar))
+    incaresidout1 = np.array(incaresidout1).squeeze()
+    incaresidout.append(incaresidout1)
+incaresidout = np.array(incaresidout).squeeze()
+#%% and plot it...
+colours = cm.get_cmap('cividis_r',n_stns)
+fig, ax = plt.subplots(nrows=1,ncols=1,sharex=False,sharey=False,figsize=(10,10))
+mmbeta2=[np.floor(np.min(abs(incaresidout[:,:,6]))),np.ceil(np.max(abs(incaresidout[:,:,6])))]
+
+# make beta_z vs depth plot
+for i in np.arange(n_stns):
+    ax.plot(incaresidout[i,:,8],-incaresidout[i,:,6],c=colours(i),linewidth=3)
+ax.set_xlabel('$\epsilon$ [-]')
+ax.set_ylabel(r'$\beta_z$ [$\mu$Gal/m$_{H2O}]$')
+#ax.set_xlim([min(GW_da),max(GW_da)])
+ax.set_ylim(mmbeta2)
+ax.set_xscale('log')
+ax.grid()
+ax.invert_xaxis()
+#ax.set_title('c)')
+
+    
+#plt.savefig('Output/Rechy_betavsacceptableresid1.pdf')
+
+

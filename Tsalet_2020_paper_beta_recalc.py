@@ -12,7 +12,7 @@ gravimeter_sensor_height = 0.48
 GW_ds = np.arange(2.5,10.1,1.25) + gravimeter_sensor_height # +0.48 is height of sensor above ground
 ndepths=np.size(GW_ds)
 
-file_out = 'Output/Tsalet_2020_paper_beta_recalc_data_out.csv'
+file_out = 'Output/Tsalet_2020_paper_beta_recalc_data_out2.csv'
 #%%
 data_out = []
 for sn,stn_x,stn_y,dgog in zip(stns_in['Station'],stns_in['X'],stns_in['Y'],stns_in['dg 2019']):
@@ -35,7 +35,8 @@ outputdf = pd.DataFrame(data=data_out2,columns=dfcols)
 outputdf.to_csv(file_out,index=False)
 #%%
 plt.figure(figsize=(6,8))
-colours = cm.get_cmap('nipy_spectral',nstns)
+#colours = cm.get_cmap('nipy_spectral',nstns)
+colours = cm.get_cmap('gist_ncar',nstns)
 for i in np.arange(0,nrows,ndepths):
     cnow=np.array(colours(int(i/ndepths)))*0.86; cnow[3]=1
     plt.plot(outputdf['eff. depth [m]'][i:i+ndepths]-gravimeter_sensor_height, outputdf['delta H (using new beta)'][i:i+ndepths], c=cnow, lw=2)
@@ -51,10 +52,11 @@ for i in np.arange(0,nrows,ndepths):
     else:
         textxpos=0.8
     plt.text(textxpos,outputdf['delta H (beta=41.93)'][i],'G'+str(int(outputdf['Station'][i])),c=cnow,horizontalalignment='center',verticalalignment='center')
-plt.xlabel(r'assumed h$_{eff}$ [m]',fontsize=14)
+plt.xlabel(r'h$_{eff}$ [m]',fontsize=14)
 plt.ylabel(r'$\Delta h$ [m$_{H2O}$]',fontsize=14)
 plt.xticks(ticks=[0,2.5,5,7.5,10],labels=['BPA','2.5','5','7.5','10'])
 plt.grid()
+plt.ylim([-5,0])
 
 #%% map with points
 DEM_in = gdal.Open(DEM_path, gdal.GA_ReadOnly) 
@@ -83,11 +85,16 @@ axs.grid(c='k')
 #for sn,stn_x,stn_y,dgog in zip(stns_in['Station'],stns_in['X'],stns_in['Y'],stns_in['dg 2019']):
 dxtext=0
 dytext=-15
+fs=12
 for i in np.arange(0,nstns):
+    if np.isin(stns_in['Station'][i],[9,2,8]):
+        dytext=-37
+    else:
+        dytext=-25
     cnow=np.array(colours(i))*0.86; cnow[3]=1
     circ=plt.Circle((stns_in['X'][i],stns_in['Y'][i]),10,color=colours(i),lw=0.5,ec='k')
     axs.add_artist(circ)
     betaznow = np.array(outputdf[outputdf['eff. depth [m]']==5.48]['beta (z-component) [uGal/m]'])[i]
     strnow='G'+str(stns_in['Station'][i]) + '|' + "{:.1f}".format(-betaznow)
-    axs.text(stns_in['X'][i]+dxtext,stns_in['Y'][i]+dytext,strnow,c='w',horizontalalignment='center',verticalalignment='center')
-axs.text(mmx[0]+75,mmy[0]+20,r'Stn|$\beta_z$',c='w',horizontalalignment='center',verticalalignment='center')
+    axs.text(stns_in['X'][i]+dxtext,stns_in['Y'][i]+dytext,strnow,c='w',horizontalalignment='center',verticalalignment='center',fontsize=fs)
+axs.text(mmx[0]+75,mmy[0]+20,r'Stn|$\beta_z$',c='w',horizontalalignment='center',verticalalignment='center',fontsize=fs+2)
