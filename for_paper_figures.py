@@ -1,3 +1,10 @@
+"""
+for_paper_figures.py
+
+Landon Halloran, www.ljsh.ca, 2021
+
+Script to produce some of the figures for the paper.
+"""
 import Gravi4GW
 import numpy as np
 import pandas as pd
@@ -227,7 +234,7 @@ ax.invert_xaxis()
     
 #plt.savefig('Output/Rechy_betavsacceptableresid1.pdf')
 
-#%%
+#%% for the figure in the readme
 fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(10,5))
 
 DEM_hs = Gravi4GW.hillshade(DEM_zC,45,20)
