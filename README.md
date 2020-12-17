@@ -17,7 +17,7 @@ Halloran, L.J.S. (under review), "Improving groundwater storage change estimates
 ## How to use. 
 For a simple demonstration of usage, see `demo.py`.
 
-###Basic usage:
+Basic usage:
 ```
 import Gravi4GW
 # ...
