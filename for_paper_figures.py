@@ -228,7 +228,7 @@ ax.invert_xaxis()
 #plt.savefig('Output/Rechy_betavsacceptableresid1.pdf')
 
 #%%
-fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(10,6))
+fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(10,5))
 
 DEM_hs = Gravi4GW.hillshade(DEM_zC,45,20)
 #ls = LightSource(azdeg=315, altdeg=45)
@@ -242,18 +242,18 @@ axs[0].grid(c='k')
 plt.setp(axs[0].get_xticklabels(), rotation=45)
 plt.setp(axs[0].get_yticklabels(), rotation=45)
 
-cbarax1 = fig.add_axes([0.80, 0.75, 0.02, 0.2])
-fig.colorbar(demobj, cax=cbarax1, orientation='vertical')
+#cbarax1 = fig.add_axes([0.20, 0.1, 0.2, 0.02])
+#fig.colorbar(demobj, cax=cbarax1, orientation='horizontal')
 levels=np.linspace(np.min(output1[:,-1]),41.93*2-np.min(output1[:,-1]),101)
 stn_array_size = [np.size(stn_x_array),np.size(stn_y_array)]
 
 cbobj2 = axs[1].contourf(output2[:,0].reshape(np.flip(stn_array_size)), output2[:,1].reshape(np.flip(stn_array_size)), output2[:,-1].reshape(np.flip(stn_array_size)),levels=levels,cmap='bwr')
 for c in cbobj2.collections:
     c.set_edgecolor("face")
-axs[1].set_title(r'$\beta$')
+axs[1].set_title(r'Calculated $\beta$')
 axs[1].set_aspect('equal')
 axs[1].grid(c='k')
-plt.setp(axs[2].get_yticklabels(), rotation=45)
-plt.setp(axs[2].get_xticklabels(), rotation=45)
-cbarax3 = fig.add_axes([0.80, 0.4, 0.02, 0.2])
-fig.colorbar(cbobj2, cax=cbarax3, orientation='vertical')
+plt.setp(axs[1].get_yticklabels(), rotation=45)
+plt.setp(axs[1].get_xticklabels(), rotation=45)
+#cbarax3 = fig.add_axes([0.70, 0.1, 0.2, 0.02])
+#fig.colorbar(cbobj2, cax=cbarax3, orientation='horizontal')

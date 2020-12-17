@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 Gravi4GW.py
+
 Landon Halloran (ljsh.ca) 2021
+
 https://github.com/lhalloran/Gravi4GW
+
 """
 
 import numpy as np
@@ -65,8 +68,6 @@ def pointmaker(stn_x, stn_y, max_r, nr, dens_azi=8):
     for i in np.arange(nr):
         for j in np.arange(n[i]):
             pt_r = np.append(pt_r,rs[i])
-            #print(i)
-            #print(pt_r)
             pt_phi = np.append(pt_phi,2*np.pi*j/n[i])
             pt_A = np.append(pt_A,A[i])
     # convert to x,y cords:
@@ -105,8 +106,15 @@ def dg(xyz_stn,xyz_pt,dm,debug=False):
     return dgxyz
 
 def hillshade(array,azimuth,angle_altitude):
-    # Adapted from:
-    # github.com/rveciana/introduccion-python-geoespacial/blob/master/hillshade.py
+    """ 
+    Gravi4GW.hillshade(array,azimuth,angle_altitude)
+    Adapted from github.com/rveciana/introduccion-python-geoespacial/blob/master/hillshade.py
+    
+    Arguments:
+        array: 2-D numpy array
+        azimuth: azimuthal angle of lightsource (degrees)
+        angle_altitude: altitude angle of lightsource (degrees)
+    """ 
     azimuth = 360.0 - azimuth 
 
     x, y = np.gradient(array)
@@ -122,7 +130,7 @@ def hillshade(array,azimuth,angle_altitude):
 
 def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=30, do_figs=True):
     """ 
-    Gravi4GW.Gravi4GW()
+    Gravi4GW.Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=30, do_figs=True)
     
     Arguments:
         tif_path: string 
