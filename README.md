@@ -1,11 +1,11 @@
 # Gravi4GW
-by Landon Halloran (www.ljsh.ca) 2021
+Landon Halloran (www.ljsh.ca) 2021
 
-## What it is
-Gravi4GW (pronounced *Gra-vee-for-ground-wa-ter*) is a python tool that enables the calculation of the conversion factor between changes in gravity (&Delta;g) as measured using time-lapse gravimetry and changes in groundwater storage (GWSC). The tool calculates &beta, the rate of change in gravity as groundwater storage changes (dg/dh) in units of uGal/m<sub>H2O</sub> (=1 x 10<sup>-8</sup> s<sup>-2</sup>).
+## What it is and what it does.
+Gravi4GW (pronounced *Gra-vee-for-ground-wa-ter*) is a python tool that enables the calculation of the conversion factor between changes in gravity (&Delta;g) as measured using time-lapse gravimetry and changes in groundwater storage (GWSC). The tool calculates &beta;, the rate of change in gravity as groundwater storage changes (dg/dh) in units of &mu;Gal/m<sub>H2O</sub> (=1 x 10<sup>-8</sup> s<sup>-2</sup>).
 
 Basic intended uses are:
-- Conversion of measured &Delta; g data to equivalent GWSC in terms of equivalent free water column height in meters.
+- Conversion of measured &Delta;g data to equivalent GWSC in terms of equivalent free water column height in meters.
 - Creation of maps of &beta; to target gravimetric field work.
 - Uncertainty analysis in hydrogeological time-lapse gravimetry studies.
 
