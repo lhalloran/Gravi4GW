@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 # define path to DEM or GW elevation model (must be in a meter-based projection)
-DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
+DEM_path = 'Geotiff/example_DEM.tif'
 
 GW_d = 4 # assumed depth to water table from ground surface
 stn_x_array = 2606457 + 20*np.arange(-10,10)

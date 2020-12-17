@@ -1,33 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Gravi4GW###.py
-14.10.2020 L Halloran
-
-Part of time-lapse gravimetry project. Determines change in gravity caused by 
-drop/rise of the water table, taking topography into account.
-
-v001/002: created. stumbling upon efficiently making fine grid
-v003/004: fine grid idea abandoned, now making concentric points array, and interpolating that way
-v005: moved functions to another file G4GW_f... might convert to class later
-v006: now synced to github repo Gravi4GW
-v008: made into big function, moved script input/pre-processing part to demo.py  (eliminated 00X suffix from file name)
+Gravi4GW.py
+Landon Halloran (ljsh.ca) 2021
+https://github.com/lhalloran/Gravi4GW
 """
+
 import numpy as np
-#import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.interpolate as interp
 from osgeo import gdal
-#from matplotlib.colors import LightSource
-#import G4GW_f
 
 # define constants (all in SI units)
-G=6.67408E-11 # gravitational constant
+G = 6.67408E-11 # gravitational constant
 rho_H2O = 1000 # density of water
 
 def quickplotterxyz(x,y,z):
     """
     quickplotterxyz(x,y,z)
-    Simple plotting of x,y,z arrays for debugging.
+    Simple plotting of x,y,z arrays for debugging/sanity checks.
     x,y,z : 2-D arrays of x, y, and elevation
     """
     fig, axs = plt.subplots(nrows=1,ncols=3,sharex=True,sharey=True,figsize=(12,6)) 
@@ -35,9 +25,9 @@ def quickplotterxyz(x,y,z):
     axs[1].imshow(y); axs[1].set_title('y, min='+str(int(min(y.flatten())))+', max='+str(int(max(y.flatten()))))
     axs[2].imshow(z); axs[2].set_title('z, min='+str(int(min(z.flatten())))+', max='+str(int(max(z.flatten()))))
 
-def pointmaker(stn_x,stn_y,max_r,nr,dens_azi=8):
+def pointmaker(stn_x, stn_y, max_r, nr, dens_azi=8):
     """
-    pointmaker(stn_x,stn_y,max_r,nr,dens_azi=8)
+    pointmaker(stn_x, stn_y, max_r, nr, dens_azi=8)
     
     Returns x,y coordinates the element area represented by 
     each point. Point distribution is radial with increasing 
@@ -55,33 +45,33 @@ def pointmaker(stn_x,stn_y,max_r,nr,dens_azi=8):
     if dens_azi%4 != 0:
         print('#Gravi4GW: pointmaker requires a radial density parameter dens_azi that is a multiple of 4')
         return 0
-    rs=np.append(np.array(0.0),np.logspace(np.log10(0.1), np.log10(max_r), num=nr-1))
-    log_fac=np.log10(rs[-1]/rs[-2])
-    rsextra=rs[-1]*10**log_fac # for calculation of elemental areas of farthest points
-    n=rs-rs
-    n=dens_azi + 4*np.floor_divide(rs,10) #number of points for given r, increasing with radius
-    n[0]=1 # one point at centre
+    rs = np.append(np.array(0.0),np.logspace(np.log10(0.1), np.log10(max_r), num=nr-1))
+    log_fac = np.log10(rs[-1]/rs[-2])
+    rsextra = rs[-1]*10**log_fac # for calculation of elemental areas of farthest points
+    n = rs-rs
+    n = dens_azi + 4*np.floor_divide(rs,10) #number of points for given r, increasing with radius
+    n[0] = 1 # one point at centre
     A = rs-rs # area represent by each point at given r
     for i in np.arange(1,nr-1):
         r_out = (rs[i+1]+rs[i])/2 # outer radius of element
         r_in = (rs[i]+rs[i-1])/2 # inter radius of element
         A[i] = np.pi*(r_out**2-r_in**2)/n[i]
     A[0] = np.pi*((rs[0]+rs[1])/2)**2
-    A[-1]=np.pi*((rsextra+rs[-1])**2-(rs[-1]+rs[-2])**2)/(4*n[-1])
+    A[-1] = np.pi*((rsextra+rs[-1])**2-(rs[-1]+rs[-2])**2)/(4*n[-1])
     # make r,phi coordinates, referenced to centre point
-    pt_r=np.array([])
-    pt_phi=np.array([])
-    pt_A=np.array([])
+    pt_r = np.array([])
+    pt_phi = np.array([])
+    pt_A = np.array([])
     for i in np.arange(nr):
         for j in np.arange(n[i]):
             pt_r = np.append(pt_r,rs[i])
             #print(i)
             #print(pt_r)
             pt_phi = np.append(pt_phi,2*np.pi*j/n[i])
-            pt_A=np.append(pt_A,A[i])
+            pt_A = np.append(pt_A,A[i])
     # convert to x,y cords:
-    x=stn_x+np.multiply(pt_r,np.cos(pt_phi))
-    y=stn_y+np.multiply(pt_r,np.sin(pt_phi))
+    x = stn_x+np.multiply(pt_r,np.cos(pt_phi))
+    y = stn_y+np.multiply(pt_r,np.sin(pt_phi))
     return x,y,pt_A
 
 def dg(xyz_stn,xyz_pt,dm,debug=False):
@@ -97,17 +87,17 @@ def dg(xyz_stn,xyz_pt,dm,debug=False):
     debug : True will print internal values for each call of the function
     """
     dxyz = xyz_pt-xyz_stn;
-    dx=dxyz[0]
-    dy=dxyz[1]
-    dz=dxyz[2]
+    dx = dxyz[0]
+    dy = dxyz[1]
+    dz = dxyz[2]
     d = np.sqrt(dx**2+dy**2+dz**2) #distance between station and point
     dg1 = G*dm/d**2
     theta = np.arctan2(dz,np.sqrt(dx**2+dy**2)) # angle below xy surface
     phi = np.arctan2(dy,dx)    
-    dgx=dg1*np.cos(theta)*np.sin(phi)
-    dgy=dg1*np.cos(theta)*np.cos(phi)
-    dgz=dg1*np.sin(theta)
-    dgxyz=np.array([dgx,dgy,dgz])
+    dgx = dg1*np.cos(theta)*np.sin(phi)
+    dgy = dg1*np.cos(theta)*np.cos(phi)
+    dgz = dg1*np.sin(theta)
+    dgxyz = np.array([dgx,dgy,dgz])
     if(debug):
         print(dxyz)
         print([d,dg1,theta,phi])
@@ -160,8 +150,8 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
     xy_inds = np.indices((DEM_in.RasterXSize, DEM_in.RasterYSize))
     DEM_x = DEM_geotransform[0] + DEM_geotransform[1]*xy_inds[0] + DEM_geotransform[2]*xy_inds[1]
     DEM_y = DEM_geotransform[3] + DEM_geotransform[4]*xy_inds[0] + DEM_geotransform[5]*xy_inds[1]
-    DEM_x=DEM_x.transpose()
-    DEM_y=DEM_y.transpose()
+    DEM_x = DEM_x.transpose()
+    DEM_y = DEM_y.transpose()
     if do_figs:
         quickplotterxyz(DEM_x,DEM_y,DEM_z)
 
@@ -194,28 +184,28 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
 
     for n in np.arange(nstns):
         print('Station point '+str(n+1)+' of '+str(nstns))
-        stn_xyz=np.array([stn_x[n],stn_y[n],stn_z[n]])
+        stn_xyz = np.array([stn_x[n],stn_y[n],stn_z[n]])
         GW_d = GW_depth # this could be non-constant in future versions.
         
         # create sampling points and calulate DEM at these points
         print('#Gravi4GW: Defining sampling points and calculating interpolated DEM at these points...')
     
         xx,yy,AA = pointmaker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_azi=8)
-        npts=np.size(xx)
-        zz=xx-xx
+        npts = np.size(xx)
+        zz = xx-xx
         for i in np.arange(npts):
-            zz[i]=interp_spline(xx[i],-yy[i])
+            zz[i] = interp_spline(xx[i],-yy[i])
         if n==0 and do_figs: # plot of points for integration (only do this once)
             plt.figure(figsize=(10,8)); plt.scatter(xx,yy,c=zz,s=AA,alpha=0.5); plt.axis('equal'); plt.title(str(npts)+' Integration Points'); plt.colorbar()# plot points
             
         # Calculate dg/dH by numerical integration:
-        dH=0.01 # drop in water table in equivalent H2O (equivalent to delta hydraulic head / porosity). Should be small so as to estimate dG/dH.
+        dH = 0.01 # drop in water table in equivalent H2O (equivalent to delta hydraulic head / porosity). Should be small so as to estimate dG/dH.
         dgxyz_sum = np.array([0,0,0])
-        progresspct=0
+        progresspct = 0
         print('#Gravi4GW: Evaluating delta g integral...')
         for i in np.arange(npts):
             if int(100*i/npts)-progresspct >=20: # print progress
-                progresspct=int(100*i/npts)
+                progresspct = int(100*i/npts)
                 print('#Gravi4GW: Integration progress = '+str(progresspct)+'%')
             dm = dH*rho_H2O*AA[i]
             pt_xyz = np.array([xx[i],yy[i],zz[i]-GW_d])
@@ -228,23 +218,16 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         print('#Gravi4GW: beta_y = ' + str(dgdH_uGal[1]) + ' uGal/mH2O')
         print('#Gravi4GW: beta_z = ' + str(dgdH_uGal[2]) + ' uGal/mH2O')
         print('#Gravi4GW: beta = '   + str(dgdH_uGal[3]) + ' uGal/mH2O')
-    dataproc=np.array(dataproc) #convert data to numpy array
+    dataproc = np.array(dataproc) #convert data to numpy array
 
     #%% plot the results
     only1xy = np.size(gravstn_x) > 1 and np.size(gravstn_y) > 1
     if do_figs and only1xy:
-        # maybe improve this using https://matplotlib.org/3.1.1/gallery/specialty_plots/topographic_hillshading.html
         fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(15,8))
         DEM_hs = hillshade(DEM_zC,45,20)
-        #ls = LightSource(azdeg=315, altdeg=45)
         cbobj1 = axs[0].imshow(np.flipud(DEM_hs),cmap='Greys',alpha=1, interpolation='bilinear',extent=[DEM_xC[0,0],DEM_xC[0,-1],DEM_yC[0,0],DEM_yC[-1,0]])
         demobj = axs[0].contourf(DEM_xC,DEM_yC,DEM_zC,cmap='gist_earth',alpha=0.5, levels=80)
         plt.gca().invert_yaxis()
-        #cbobj1 = axs[0].contourf(DEM_xC,DEM_yC,DEM_hs,cmap='Greys',alpha=0.5,levels=40)
-        #axs[0].pcolor(DEM_xC,DEM_yC,DEM_hs,cmap='Greys',alpha=0.5,linewidth=0,rasterized=True)
-        #for c in cbobj1.collections:
-        #    c.set_edgecolor("face")
-        #    c.set_alpha(0.5)
         
         axs[0].set_title('Input data (m)')
         axs[0].set_aspect('equal')
@@ -255,8 +238,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         cbarax1 = fig.add_axes([0.48, 0.2, 0.01, 0.6])
         fig.colorbar(demobj, cax=cbarax1, orientation='vertical')
         
-        levels=np.linspace(np.min(dataproc[:,-1]),41.93*2-np.min(dataproc[:,-1]),101)
-        #cbobj2 = axs[1].contourf(stn_x_array, stn_y_array, dataproc[:,-1].reshape(stn_array_size),levels=levels,cmap='bwr')
+        levels = np.linspace(np.min(dataproc[:,-1]),41.93*2-np.min(dataproc[:,-1]),101)
         cbobj2 = axs[1].contourf(gravstn_x, gravstn_y, dataproc[:,-1].reshape(np.flip(stn_array_size)),levels=levels,cmap='bwr')
         for c in cbobj2.collections:
             c.set_edgecolor("face")

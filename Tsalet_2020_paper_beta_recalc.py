@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from osgeo import gdal
 
-DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
+DEM_path = 'Geotiff/example_DEM.tif'
 stns_in = pd.read_csv('Other/Tsalet_HP_Paper_Gravi_Stns.csv')
 nstns = stns_in.shape[0]
 gravimeter_sensor_height = 0.48
 GW_ds = np.arange(2.5,10.1,1.25) + gravimeter_sensor_height # +0.48 is height of sensor above ground
 ndepths=np.size(GW_ds)
 
-file_out = 'Output/Tsalet_2020_paper_beta_recalc_data_out2.csv'
+file_out = 'Output/Tsalet_2020_paper_beta_recalc_data_out3.csv'
 #%%
 data_out = []
 for sn,stn_x,stn_y,dgog in zip(stns_in['Station'],stns_in['X'],stns_in['Y'],stns_in['dg 2019']):

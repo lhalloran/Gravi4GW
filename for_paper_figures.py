@@ -7,11 +7,11 @@ from matplotlib import cm
 #import matplotlib.patches as mpatches
 
 #%%
-DEM_path = 'DEMs/RechyDEM_swisstopo_2m.tif'
+DEM_path = 'Geotiff/example_DEM.tif'
 stn_x_array = 2606457 + 20*np.arange(-25,25)
 stn_y_array = 1116119 + 20*np.arange(-25,25)
 dfcols = ['x [m]','y [m]','z [m]','stn. height above GW table [m]','dg/dH (x-component) [uGal/m]','dg/dH (y-component) [uGal/m]','dg/dH (z-component) [uGal/m]','dg/dH [uGal/m]']
-#%% decomment this to run first time (if no csv output files exist)
+#%% remove comments to run first time (if no csv output files exist)
 #GW_d = 2.5 # assumed depth to water table from ground surface
 #output1 = Gravi4GW.Gravi4GW(DEM_path, stn_x_array, stn_y_array, GW_d, accept_resid=0.02, n_r=40, do_figs=True)
 file_out1 = 'Output/data_out250cm.csv'
@@ -227,4 +227,33 @@ ax.invert_xaxis()
     
 #plt.savefig('Output/Rechy_betavsacceptableresid1.pdf')
 
+#%%
+fig, axs = plt.subplots(nrows=1,ncols=2,sharex=True,sharey=True,figsize=(10,6))
 
+DEM_hs = Gravi4GW.hillshade(DEM_zC,45,20)
+#ls = LightSource(azdeg=315, altdeg=45)
+cbobj1 = axs[0].imshow(np.flipud(DEM_hs),cmap='Greys',alpha=1, interpolation='bilinear',extent=[DEM_xC[0,0],DEM_xC[0,-1],DEM_yC[0,0],DEM_yC[-1,0]])
+demobj = axs[0].contourf(DEM_xC,DEM_yC,DEM_zC,cmap='gist_earth',alpha=0.5, levels=80)
+plt.gca().invert_yaxis()
+
+axs[0].set_title('Input geotiff')
+axs[0].set_aspect('equal')
+axs[0].grid(c='k')
+plt.setp(axs[0].get_xticklabels(), rotation=45)
+plt.setp(axs[0].get_yticklabels(), rotation=45)
+
+cbarax1 = fig.add_axes([0.80, 0.75, 0.02, 0.2])
+fig.colorbar(demobj, cax=cbarax1, orientation='vertical')
+levels=np.linspace(np.min(output1[:,-1]),41.93*2-np.min(output1[:,-1]),101)
+stn_array_size = [np.size(stn_x_array),np.size(stn_y_array)]
+
+cbobj2 = axs[1].contourf(output2[:,0].reshape(np.flip(stn_array_size)), output2[:,1].reshape(np.flip(stn_array_size)), output2[:,-1].reshape(np.flip(stn_array_size)),levels=levels,cmap='bwr')
+for c in cbobj2.collections:
+    c.set_edgecolor("face")
+axs[1].set_title(r'$\beta$')
+axs[1].set_aspect('equal')
+axs[1].grid(c='k')
+plt.setp(axs[2].get_yticklabels(), rotation=45)
+plt.setp(axs[2].get_xticklabels(), rotation=45)
+cbarax3 = fig.add_axes([0.80, 0.4, 0.02, 0.2])
+fig.colorbar(cbobj2, cax=cbarax3, orientation='vertical')
