@@ -128,9 +128,9 @@ def hillshade(array,azimuth,angle_altitude):
     return 255*(shaded + 1)/2
 
 
-def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=30, do_figs=True):
+def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=30, dens_azi=8, do_figs=True):
     """ 
-    Gravi4GW.Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=30, do_figs=True)
+    Gravi4GW.Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=30, dens_azi=8, do_figs=True)
     
     Arguments:
         tif_path: string 
@@ -146,6 +146,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
      Optional arguments:
          accept_resid: approximate acceptable residual based on Bouger plate approximation (see paper)
          n_r: number of radial distances for point definition in numerical integral (default = 30)
+         dens_azi: azimuthal density parameter for integration mesh creation, multiple of 4 (default = 8)
          do_figs: boolean to enable creation of figures.
     """
     DEM_in = gdal.Open(tif_path, gdal.GA_ReadOnly) 
@@ -198,7 +199,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
         # create sampling points and calulate DEM at these points
         print('#Gravi4GW: Defining sampling points and calculating interpolated DEM at these points...')
     
-        xx,yy,AA = pointmaker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_azi=8)
+        xx,yy,AA = pointmaker(stn_xyz[0],stn_xyz[1],max_r,n_r,dens_azi=dens_azi)
         npts = np.size(xx)
         zz = xx-xx
         for i in np.arange(npts):
