@@ -1,7 +1,7 @@
 # Gravi4GW
 Landon Halloran (www.ljsh.ca) 2021
 
-## Documentation
+## Documentation / how to cite
 This software is presented in the following article (in pre-print version as of 02.07.2021):
 - **L.J.S. Halloran (2021). "Improving groundwater storage change estimates using time-lapse gravimetry with Gravi4GW." Earth and Space Science Open Archive. doi:10.1002/essoar.10507438.1** http://doi.org/10.1002/essoar.10507438.1
 
@@ -16,9 +16,6 @@ Basic intended uses are:
 - Uncertainty analysis in hydrogeological time-lapse gravimetry studies.
 
 ![](/Output/example_output_fig.png "Example output")
-
-## How to cite.
-Halloran, L.J.S. (under review), "Improving groundwater storage change estimates using time-lapse gravimetry with Gravi4GW".
 
 ## How to use. 
 For a simple demonstration of usage, see `demo.py`.
