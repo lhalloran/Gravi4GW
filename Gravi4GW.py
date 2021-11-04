@@ -219,6 +219,7 @@ def Gravi4GW(tif_path, gravstn_x, gravstn_y, GW_depth, accept_resid=0.025, n_r=3
             dm = dH*rho_H2O*AA[i]
             pt_xyz = np.array([xx[i],yy[i],zz[i]-GW_d])
             dgxyz_sum = dgxyz_sum + dg(stn_xyz,pt_xyz,dm)
+        dgxyz_sum[2]=-dgxyz_sum[2] # switch to z-component positive convention
         dg1 = np.append(dgxyz_sum,np.sqrt(dgxyz_sum[0]**2+dgxyz_sum[1]**2+dgxyz_sum[2]**2))
         dgdH = dg1/dH
         dgdH_uGal = dgdH*1E8 #in microGal/mH2O

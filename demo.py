@@ -13,6 +13,6 @@ file_out = 'Output/data_out.csv'
 
 output = Gravi4GW.Gravi4GW(DEM_path, stn_x_array, stn_y_array, h_eff, accept_resid=0.02, n_r=40, do_figs=True)
 
-dfcols = ['x [m]','y [m]','z [m]','stn. height above GW table [m]','dg/dH (x-component) [uGal/m]','dg/dH (y-component) [uGal/m]','dg/dH (z-component) [uGal/m]','dg/dH [uGal/m]']
+dfcols = ['x [m]','y [m]','z [m]','stn. height above GW table [m]','beta_x [uGal/m]','beta_y [uGal/m]','beta_z (z-component) [uGal/m]','beta [uGal/m]']
 outputdf = pd.DataFrame(data=output,columns=dfcols)
 outputdf.to_csv(file_out,index=False)
