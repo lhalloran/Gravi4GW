@@ -13,8 +13,7 @@ Basic intended uses are:
 
 ## How to cite.
 Please contact me for more info.
-Halloran, L.J.S. (in revision), "Improving groundwater storage change estimates using time-lapse gravimetry with Gravi4GW".
-A citable pre-print version is available here: https://doi.org/10.1002/essoar.10507438.1
+Halloran, L.J.S. (2022). "Improving groundwater storage change estimates using time-lapse gravimetry with Gravi4GW", *Environmental Modelling and Software* **150**, 105340. https://doi.org/10.1016/j.envsoft.2022.105340
 
 ## How to use. 
 For a simple demonstration of usage, see `demo.py`.
