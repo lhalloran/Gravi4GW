@@ -12,8 +12,9 @@ Basic intended uses are:
 ![](/Output/example_output_fig.png "Example output")
 
 ## How to cite.
-Please contact me for more info.
 Halloran, L.J.S. (2022). "Improving groundwater storage change estimates using time-lapse gravimetry with Gravi4GW", *Environmental Modelling and Software* **150**, 105340. https://doi.org/10.1016/j.envsoft.2022.105340
+
+Please contact me for more info.
 
 ## How to use. 
 For a simple demonstration of usage, see `demo.py`.
