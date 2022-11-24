@@ -2,7 +2,7 @@
 Landon Halloran (www.ljsh.ca) 2021
 
 ## What it is and what it does.
-Gravi4GW (pronounced *Gra-vee-for-ground-wa-ter*) is a python tool that enables the calculation of the conversion factor between changes in gravity (&Delta;g) as measured using time-lapse gravimetry and changes in groundwater storage (GWSC). The tool calculates &beta;, the rate of change in gravity as groundwater storage changes (dg/dh) in units of &mu;Gal/m<sub>H2O</sub> (=1 x 10<sup>-8</sup> s<sup>-2</sup>). This term is also known as "topographical admittance.".
+Gravi4GW (pronounced *Gra-vee-for-ground-wa-ter*) is a python tool that enables the calculation of the conversion factor between changes in gravity (&Delta;g) as measured using time-lapse gravimetry and changes in groundwater storage (GWSC). The tool calculates &beta (or rather, &beta<sub>z</sub>), the rate of change in gravity as groundwater storage changes (dg/dh) in units of &mu;Gal/m<sub>H2O</sub> (=1 x 10<sup>-8</sup> s<sup>-2</sup>). A very similar quantity, wherein the effective depth to the groundwater table is set to 0, is also known as "topographical admittance.".
 
 Basic intended uses are:
 - Conversion of measured &Delta;g data to GWSC in terms of equivalent free water column height in meters.
